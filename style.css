@@ -263,3 +263,177 @@ button:focus-visible {
         --color-border: #ffffff;
     }
 }
+/* ===============================
+   HERO VISUAL (PRO LEVEL)
+   =============================== */
+
+.hero-visual {
+    position: relative;
+    width: min(100%, 500px);
+    aspect-ratio: 1 / 1.2;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+/* 🔵 Circle */
+.hero-circle {
+    position: absolute;
+    width: 85%;
+    height: 85%;
+    border-radius: 50%;
+
+    background: radial-gradient(circle,
+        rgba(14,165,233,0.35) 0%,
+        rgba(14,165,233,0.15) 40%,
+        transparent 70%
+    );
+
+    filter: blur(10px);
+    z-index: 1;
+}
+
+/* 👤 Your image */
+.hero-person {
+    position: relative;
+    z-index: 2;
+
+    width: 90%;
+    max-height: 95%;
+
+    object-fit: contain;
+
+    /* blend bottom */
+    mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
+
+/* 💡 Glow effect */
+.hero-visual::after {
+    content: '';
+    position: absolute;
+    bottom: 80px;   /* 🔥 move blur UP */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 260px;
+    height: 100px;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(0, 180, 255, 0.35) 0%,
+        rgba(0, 180, 255, 0.15) 40%,
+        transparent 80%
+    );
+    filter: blur(30px);
+    z-index: 2;
+}
+
+/* ===============================
+   RESPONSIVE (NO BREAKING)
+   =============================== */
+
+/* Desktop */
+@media (min-width: 1024px) {
+    .hero-visual {
+        width: 520px;
+    }
+}
+
+/* Tablet */
+@media (max-width: 1023px) {
+    .hero-visual {
+        width: 420px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+    .hero-visual {
+        width: 300px;
+    }
+
+    .hero-person {
+        width: 95%;
+    }
+}
+@media (max-width: 768px) {
+    .hero-visual::after {
+        bottom: 50px;
+        width: 200px;
+        height: 80px;
+    }
+}
+/* ============================================
+   HERO GRID FIX (MAIN FIX)
+============================================ */
+
+/* GRID SYSTEM */
+.hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 60px;
+}
+
+/* IMAGE SIDE (LEFT) */
+.hero-visual-wrap {
+    display: flex;
+    justify-content: flex-start; /* 🔥 LEFT */
+    align-items: center;
+}
+
+/* CONTENT SIDE */
+.hero-content {
+    text-align: left;
+}
+
+/* IMAGE POSITION FIX */
+.hero-visual {
+    align-items: flex-end;
+}
+
+.hero-person {
+    transform: translateY(-130px); /* 🔥 move UP */
+}
+
+
+/* ============================================
+   MOBILE FIX (IMPORTANT)
+============================================ */
+
+@media (max-width: 1024px) {
+
+    .hero-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    /* IMAGE ON TOP */
+    .hero-visual-wrap {
+        order: -1;
+        justify-content: center;
+    }
+
+    .hero-content {
+        text-align: center;
+    }
+
+    .hero-person {
+        transform: translateY(-20px);
+    }
+}
+
+
+/* ============================================
+   SMALL MOBILE
+============================================ */
+
+@media (max-width: 640px) {
+
+    .hero-grid {
+        gap: 30px;
+    }
+
+    .hero-person {
+        width: 85%;
+    }
+}
