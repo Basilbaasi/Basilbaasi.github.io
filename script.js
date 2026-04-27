@@ -1,7 +1,3 @@
-/**
- * Basil C K Portfolio - Minimal JavaScript
- * Clean, fast, and lightweight interactions
- */
 
 // ============================================
 // DOM Elements
@@ -9,12 +5,23 @@
 const navbar = document.getElementById('navbar');
 const mobileMenuBtn = document.getElementById('mobile-menu-btn');
 const mobileMenu = document.getElementById('mobile-menu');
-const navLinks = document.querySelectorAll('nav a[href^="#"]');
+
+// Desktop links are the links in the top nav bar only
+const desktopNavLinks = navbar
+    ? navbar.querySelectorAll('.hidden.md\\:flex a[href^="#"]')
+    : [];
+
+// Mobile links are the links inside the mobile dropdown
+const mobileNavLinks = mobileMenu
+    ? mobileMenu.querySelectorAll('a[href^="#"]')
+    : [];
 
 // ============================================
 // Navbar Scroll Effect
 // ============================================
 function handleNavbarScroll() {
+    if (!navbar) return;
+
     if (window.scrollY > 50) {
         navbar.classList.add('scrolled');
     } else {
@@ -26,56 +33,86 @@ function handleNavbarScroll() {
 // Mobile Menu Toggle
 // ============================================
 function toggleMobileMenu() {
+    if (!mobileMenu || !mobileMenuBtn) return;
+
     mobileMenu.classList.toggle('hidden');
     mobileMenu.classList.toggle('active');
-    
-    // Toggle menu icon
+
     const icon = mobileMenuBtn.querySelector('i');
-    if (mobileMenu.classList.contains('hidden')) {
-        icon.setAttribute('data-lucide', 'menu');
-    } else {
-        icon.setAttribute('data-lucide', 'x');
+    if (icon) {
+        if (mobileMenu.classList.contains('hidden')) {
+            icon.setAttribute('data-lucide', 'menu');
+        } else {
+            icon.setAttribute('data-lucide', 'x');
+        }
+        if (window.lucide) lucide.createIcons();
     }
-    lucide.createIcons();
+}
+
+function closeMobileMenu() {
+    if (!mobileMenu || !mobileMenuBtn) return;
+
+    if (!mobileMenu.classList.contains('hidden')) {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('active');
+
+        const icon = mobileMenuBtn.querySelector('i');
+        if (icon) {
+            icon.setAttribute('data-lucide', 'menu');
+            if (window.lucide) lucide.createIcons();
+        }
+    }
 }
 
 // ============================================
-// Smooth Scroll for Navigation Links
+// Smooth Scroll for Desktop Links
 // ============================================
-function handleSmoothScroll(e) {
+function handleDesktopSmoothScroll(e) {
     e.preventDefault();
-    
+
     const targetId = this.getAttribute('href');
+    if (!targetId || !targetId.startsWith('#')) return;
+
     const targetSection = document.querySelector(targetId);
-    
-    if (targetSection) {
-        // Close mobile menu if open
-        if (!mobileMenu.classList.contains('hidden')) {
-            toggleMobileMenu();
-        }
-        
-        // Calculate offset for fixed navbar
-        const navbarHeight = navbar.offsetHeight;
-        const targetPosition = targetSection.offsetTop - navbarHeight;
-        
-        // Smooth scroll to target
-        window.scrollTo({
-            top: targetPosition,
-            behavior: 'smooth'
+    if (!targetSection) return;
+
+    targetSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+    });
+
+    history.pushState(null, '', targetId);
+}
+
+// ============================================
+// Mobile Link Click
+// ============================================
+function handleMobileNavClick(e) {
+    e.preventDefault();
+
+    const targetId = this.getAttribute('href');
+    if (!targetId || !targetId.startsWith('#')) return;
+
+    const targetSection = document.querySelector(targetId);
+    if (!targetSection) return;
+
+    closeMobileMenu();
+
+    // Let the menu collapse first, then scroll
+    setTimeout(() => {
+        targetSection.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
         });
-    }
+
+        history.pushState(null, '', targetId);
+    }, 50);
 }
 
 // ============================================
 // Intersection Observer for Fade-in Animations
 // ============================================
 function initScrollAnimations() {
-    const observerOptions = {
-        root: null,
-        rootMargin: '0px',
-        threshold: 0.1
-    };
-    
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -84,9 +121,12 @@ function initScrollAnimations() {
                 observer.unobserve(entry.target);
             }
         });
-    }, observerOptions);
-    
-    // Observe all sections
+    }, {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1
+    });
+
     const sections = document.querySelectorAll('section');
     sections.forEach(section => {
         section.style.opacity = '0';
@@ -98,17 +138,22 @@ function initScrollAnimations() {
 // Active Navigation Link Highlighting
 // ============================================
 function highlightActiveNavLink() {
+    if (!navbar) return;
+
     const sections = document.querySelectorAll('section[id]');
     const scrollPos = window.scrollY + navbar.offsetHeight + 100;
-    
+
     sections.forEach(section => {
         const sectionTop = section.offsetTop;
         const sectionHeight = section.offsetHeight;
         const sectionId = section.getAttribute('id');
-        
+
         if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
-            navLinks.forEach(link => {
+            const allNavLinks = document.querySelectorAll('nav a[href^="#"]');
+
+            allNavLinks.forEach(link => {
                 link.classList.remove('text-primary-400');
+
                 if (link.getAttribute('href') === `#${sectionId}`) {
                     link.classList.add('text-primary-400');
                 }
@@ -121,24 +166,21 @@ function highlightActiveNavLink() {
 // Copy to Clipboard Functionality
 // ============================================
 function initCopyToClipboard() {
-    // Find all elements with data-copy attribute
     const copyElements = document.querySelectorAll('[data-copy]');
-    
+
     copyElements.forEach(element => {
-        element.addEventListener('click', async function() {
+        element.addEventListener('click', async function () {
             const textToCopy = this.getAttribute('data-copy');
-            
+
             try {
                 await navigator.clipboard.writeText(textToCopy);
-                
-                // Show feedback
+
                 const originalText = this.textContent;
                 this.textContent = 'Copied!';
-                
+
                 setTimeout(() => {
                     this.textContent = originalText;
                 }, 2000);
-                
             } catch (err) {
                 console.error('Failed to copy:', err);
             }
@@ -152,10 +194,10 @@ function initCopyToClipboard() {
 function initTypingEffect() {
     const typingElement = document.querySelector('.typing-effect');
     if (!typingElement) return;
-    
+
     const text = typingElement.textContent;
     typingElement.textContent = '';
-    
+
     let i = 0;
     const typeWriter = () => {
         if (i < text.length) {
@@ -164,8 +206,7 @@ function initTypingEffect() {
             setTimeout(typeWriter, 100);
         }
     };
-    
-    // Start typing after a short delay
+
     setTimeout(typeWriter, 500);
 }
 
@@ -173,32 +214,26 @@ function initTypingEffect() {
 // Initialize All Functions
 // ============================================
 function init() {
-    // Navbar scroll effect
     window.addEventListener('scroll', handleNavbarScroll);
-    
-    // Mobile menu toggle
+
     if (mobileMenuBtn) {
         mobileMenuBtn.addEventListener('click', toggleMobileMenu);
     }
-    
-    // Smooth scroll for nav links
-    navLinks.forEach(link => {
-        link.addEventListener('click', handleSmoothScroll);
+
+    desktopNavLinks.forEach(link => {
+        link.addEventListener('click', handleDesktopSmoothScroll);
     });
-    
-    // Scroll animations
+
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', handleMobileNavClick);
+    });
+
     initScrollAnimations();
-    
-    // Active nav link highlighting
     window.addEventListener('scroll', highlightActiveNavLink);
-    
-    // Copy to clipboard
     initCopyToClipboard();
-    
-    // Typing effect (optional)
-    // initTypingEffect();
-    
-    // Initial check for navbar state
+
+    // initTypingEffect(); // optional
+
     handleNavbarScroll();
 }
 
@@ -215,9 +250,8 @@ if (document.readyState === 'loading') {
 // Keyboard Navigation Support
 // ============================================
 document.addEventListener('keydown', (e) => {
-    // Close mobile menu on Escape key
-    if (e.key === 'Escape' && !mobileMenu.classList.contains('hidden')) {
-        toggleMobileMenu();
+    if (e.key === 'Escape' && mobileMenu && !mobileMenu.classList.contains('hidden')) {
+        closeMobileMenu();
     }
 });
 
@@ -227,14 +261,9 @@ document.addEventListener('keydown', (e) => {
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
         clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+        timeout = setTimeout(() => func(...args), wait);
     };
 }
 
-// Apply debouncing to scroll events
 window.addEventListener('scroll', debounce(highlightActiveNavLink, 50));

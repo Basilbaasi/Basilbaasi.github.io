@@ -437,3 +437,30 @@ button:focus-visible {
         width: 85%;
     }
 }
+
+/* ===============================
+   MOBILE NAV TAP FIX
+   Paste at END of style.css
+================================ */
+
+section[id] {
+    scroll-margin-top: 80px;
+}
+
+@media (max-width: 640px) {
+    section[id] {
+        scroll-margin-top: 70px;
+    }
+}
+
+#mobile-menu {
+    position: relative;
+    z-index: 1000;
+    pointer-events: auto;
+}
+
+#mobile-menu a {
+    display: block;
+    touch-action: manipulation;
+    cursor: pointer;
+}
